@@ -1,0 +1,13 @@
+# Manejo de datos y cómputo numérico
+numpy
+pandas
+
+# Integración con AWS / SageMaker
+boto3
+sagemaker
+
+# Frontend web
+streamlit
+
+# Configuración y variables de entorno
+python-dotenv
