@@ -323,7 +323,7 @@ AWS_REGION=<span class="s">us-east-2</span></p>
 <text x="420" y="52" font-size="26" font-weight="800" fill="#B4502F">AWS · us-east-2 (Ohio)</text>
 <!-- S3 JumpStart -->
 <rect x="430" y="90" width="310" height="200" rx="18" fill="#DDEDD8" stroke="#7FAE74" stroke-width="2.5"/>
-<g font-size="20" fill="#262626"><text x="450" y="128" font-size="25" font-weight="800">S3 de JumpStart</text><text x="450" y="162">bucket de AWS, no tuyo</text><text x="450" y="194">pesos de Qwen3-4B</text><text x="450" y="226">≈ 8 GB en fp16</text><text x="450" y="264" fill="#5E7F56" font-size="18">no ocupa tu S3</text></g>
+<g font-size="20" fill="#262626"><text x="450" y="128" font-size="25" font-weight="800">S3 de JumpStart</text><text x="450" y="162">bucket de AWS, no tuyo</text><text x="450" y="194">pesos de Qwen3-4B</text><text x="450" y="226">≈ 8 GB en fp16</text><text x="450" y="264" fill="#5E7F56" font-size="17" class="mono">jumpstart-cache-prod-us-east-2</text></g>
 <!-- ECR -->
 <rect x="430" y="320" width="310" height="180" rx="18" fill="#DCE9F5" stroke="#4F86B8" stroke-width="2.5"/>
 <g font-size="20" fill="#262626"><text x="450" y="358" font-size="25" font-weight="800">ECR de AWS</text><text x="450" y="392" class="mono" font-size="18">djl-inference</text><text x="450" y="424">LMI 18 · motor vLLM</text><text x="450" y="456">CUDA 12.8</text></g>
@@ -368,7 +368,7 @@ AWS_REGION=<span class="s">us-east-2</span></p>
     <span class="arrow step" data-o="1" style="align-self:center">→</span>
     <div class="card step" data-o="2" style="flex:1"><p class="tag">2 · crear-rol</p><h3>Rol IAM</h3><p class="small">Solo si falta. <span class="mono">SageMakerQwen3ExecutionRole</span> con confianza en <span class="mono">sagemaker.amazonaws.com</span>.</p><p class="small hl"><b>$0</b></p></div>
     <span class="arrow step" data-o="2" style="align-self:center">→</span>
-    <div class="card accent step" data-o="3" style="flex:1"><p class="tag">3 · deploy</p><h3>Desplegar</h3><p class="small"><span class="mono">JumpStartModel(...).deploy()</span> con la instancia <b>siempre fija</b>. Tarda <b id="t-deploy">≈ 10 min</b>.</p><p class="small hl"><b>$1.41 / hora</b></p></div>
+    <div class="card accent step" data-o="3" style="flex:1"><p class="tag">3 · deploy</p><h3>Desplegar</h3><p class="small"><span class="mono">JumpStartModel(...).deploy()</span> con la instancia <b>siempre fija</b>. Tardó <b id="t-deploy">9 min 46 s</b>.</p><p class="small hl"><b>$1.41 / hora</b></p></div>
     <span class="arrow step" data-o="3" style="align-self:center">→</span>
     <div class="card step" data-o="4" style="flex:1"><p class="tag">4 · test</p><h3>Probar</h3><p class="small">Una pregunta en formato chat. El script quita el bloque <span class="mono">&lt;think&gt;</span> y muestra tokens y latencia.</p><p class="small hl"><b>incluido</b></p></div>
     <span class="arrow step" data-o="4" style="align-self:center">→</span>
@@ -413,8 +413,8 @@ AWS_REGION=<span class="s">us-east-2</span></p>
     <tr><td><b>Contenedor</b></td><td>scikit-learn CPU + <span class="mono">inference.py</span></td><td>LMI 18 con <b>vLLM</b> y CUDA</td></tr>
     <tr><td><b>Instancia</b></td><td>ml.m4.xlarge · CPU</td><td>ml.g5.xlarge · <b>GPU A10G 24 GB</b></td></tr>
     <tr><td><b>Entrada → salida</b></td><td>16 columnas CSV → <span class="mono">{"predictions"}</span></td><td><span class="mono">{"messages"}</span> → <span class="mono">{"choices"}</span></td></tr>
-    <tr><td><b>Una llamada tarda</b></td><td>milisegundos</td><td id="t-lat">segundos (genera token por token)</td></tr>
-    <tr><td><b>Despliegue</b></td><td>≈ 5 min</td><td id="t-dep2">≈ 10 min (descarga 8 GB y carga la GPU)</td></tr>
+    <tr><td><b>Una llamada tarda</b></td><td>milisegundos</td><td id="t-lat"><b>0.8 a 7.2 s</b> medidos (genera token por token)</td></tr>
+    <tr><td><b>Despliegue</b></td><td>≈ 5 min</td><td id="t-dep2"><b>9 min 46 s</b> medidos (descarga 8 GB y carga la GPU)</td></tr>
     <tr style="background:#FCE6DD"><td><b>Precio</b></td><td>$0.24 / hora</td><td><b>$1.41 / hora · 5.9 veces más</b></td></tr>
   </table>
   <p class="note r" style="--i:3">Lo que no cambia: <b>model + endpoint config + endpoint</b>, <span class="mono">invoke_endpoint</span> con boto3, cobro por hora encendida y la obligación de borrarlo.</p>
@@ -507,7 +507,7 @@ El usuario pregunta por la capital de
 Francia. Es París. Respondo en una frase.
 <span class="s">&lt;/think&gt;</span>
 La capital de Francia es París.</p>
-      <p class="small r" style="--i:4">Esos tokens <b>también se generan y se cobran en tiempo de GPU</b>. Con <span class="mono">max_tokens</span> bajo, el razonamiento se come la respuesta y llega vacía.</p>
+      <p class="small r" style="--i:4">Esos tokens <b>también se generan y ocupan la GPU</b>. Medido en nuestro endpoint con «¿Cuánto es 17 × 23?»: <b>333 tokens y 7.2 s</b> pensando, contra <b>16 tokens y 0.8 s</b> con <span class="mono">/no_think</span>. Misma respuesta: 391.</p>
     </div>
     <div style="display:flex;flex-direction:column;gap:18px">
       <div class="card r" style="--i:3"><p class="tag">En la app</p><h3>Se oculta</h3><p class="small"><span class="mono">serializers.strip_thinking()</span> borra el bloque con una expresión regular antes de mostrar la respuesta.</p></div>
@@ -597,7 +597,7 @@ model.deploy(instance_type=<span class="s">"ml.g5.xlarge"</span>, ...)</p>
       <p class="small">tokens de salida · <b>$0.15/M</b> de entrada. Sin tráfico, <b>$0</b>. Sin cuotas de GPU ni endpoints que borrar. No puedes subir un modelo propio arbitrario.</p></div>
   </div>
   <div class="formula r" style="--i:4;font-size:32px">$1.41 ÷ $0.60 por millón = <span style="color:var(--coral)">2.35 M tokens de salida por hora</span> para empatar</div>
-  <p class="note r" style="--i:5">Eso son ≈ <b>650 tokens por segundo</b> sin parar durante toda la hora. Para un chat de clase o un prototipo, Bedrock sale mucho más barato. SageMaker gana con tráfico alto y constante, o cuando el modelo es tuyo.</p>
+  <p class="note r" style="--i:5">Eso son ≈ <b>650 tokens por segundo</b> sin parar durante toda la hora. Una conversación en nuestro endpoint genera ≈ <b>46 tokens/s</b> (medido): harían falta unas 14 conversaciones simultáneas todo el tiempo. Para un chat de clase o un prototipo, Bedrock sale mucho más barato. SageMaker gana con tráfico alto y constante, o cuando el modelo es tuyo.</p>
   <aside class="notes">Precios de la Price List API para Qwen3 32B en us-east-2, tier estándar. Bedrock también tiene tiers flex y batch más baratos. Lección MLOps: elegir la plataforma por el patrón de tráfico, no por costumbre.</aside>
 </section>
 
@@ -682,7 +682,7 @@ aws sagemaker list-endpoints --region us-east-2</p>
     <p class="small r" style="--i:6"><a href="https://huggingface.co/Qwen/Qwen3-4B" target="_blank" rel="noopener">huggingface.co/Qwen/Qwen3-4B</a> (arquitectura, modo de razonamiento)</p>
     <p class="small r" style="--i:6"><a href="https://docs.aws.amazon.com/sagemaker/latest/dg/serverless-endpoints.html" target="_blank" rel="noopener">Serverless Inference (sin GPU)</a></p>
   </div>
-  <p class="note r" style="--i:7">Marcados como <b>aprox.</b>: reparto de memoria dentro de la GPU, tokens de caché KV disponibles y tiempo de despliegue. Los precios cambian: vuelve a consultarlos antes de cada despliegue.</p>
+  <p class="note r" style="--i:7">Marcados como <b>aprox.</b>: reparto de memoria dentro de la GPU y tokens de caché KV disponibles. Tiempos y tokens: medidos en el endpoint <span class="mono">qwen3-4b-g5</span> el 19-nov-2026. Los precios cambian: vuelve a consultarlos antes de cada despliegue.</p>
   <aside class="notes">Consultar un precio en vivo: aws pricing get-products --region us-east-1 --service-code AmazonSageMaker --filters Type=TERM_MATCH,Field=instanceName,Value=ml.g5.xlarge Type=TERM_MATCH,Field=regionCode,Value=us-east-2 Type=TERM_MATCH,Field=component,Value=Hosting</aside>
 </section>
 
