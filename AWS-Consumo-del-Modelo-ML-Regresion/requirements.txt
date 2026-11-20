@@ -4,7 +4,6 @@ pandas
 
 # Integración con AWS / SageMaker
 boto3
-sagemaker
 
 # Frontend web
 streamlit

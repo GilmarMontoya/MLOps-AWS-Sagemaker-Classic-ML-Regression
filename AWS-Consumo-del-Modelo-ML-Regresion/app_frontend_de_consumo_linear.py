@@ -26,18 +26,10 @@ st.markdown("---")
 with st.sidebar:
     st.header("⚙️ Configuración")
     
-    # Credenciales de AWS (en producción usar secrets o variables de entorno)
-    st.subheader("Credenciales AWS")
-    aws_access_key_id = st.text_input(
-        "AWS Access Key ID",
-        value=os.getenv("AWS_ACCESS_KEY_ID", ""),
-        type="password"
-    )
-    aws_secret_access_key = st.text_input(
-        "AWS Secret Access Key",
-        value=os.getenv("AWS_SECRET_ACCESS_KEY", ""),
-        type="password"
-    )
+    # Las credenciales NO se piden en pantalla: boto3 las toma solo.
+    # - Laptop: del .env (load_dotenv) o de ~/.aws (aws configure)
+    # - ECS: del rol IAM de la tarea (sin access keys)
+    st.subheader("AWS")
     region_name = st.text_input(
         "Región AWS",
         value=os.getenv("AWS_REGION", "us-east-2")
@@ -105,8 +97,8 @@ if uploaded_file is not None:
         
         if st.button("🚀 Generar Predicciones", type="primary", use_container_width=True):
             # Validamos que tengamos credenciales y endpoint
-            if not aws_access_key_id or not aws_secret_access_key or not endpoint_name:
-                st.error("❌ Por favor completa todas las credenciales y el nombre del endpoint en el sidebar")
+            if not endpoint_name:
+                st.error("❌ Por favor completa el nombre del endpoint en el sidebar")
             else:
                 try:
                     # Validamos layout: 16 columnas (solo features) o >=19 (dataset original)
@@ -121,8 +113,6 @@ if uploaded_file is not None:
                         with st.spinner("⏳ Inicializando conexión con SageMaker..."):
                             predictor = SageMakerPredictor(
                                 endpoint_name=endpoint_name,
-                                aws_access_key_id=aws_access_key_id,
-                                aws_secret_access_key=aws_secret_access_key,
                                 region_name=region_name
                             )
                         

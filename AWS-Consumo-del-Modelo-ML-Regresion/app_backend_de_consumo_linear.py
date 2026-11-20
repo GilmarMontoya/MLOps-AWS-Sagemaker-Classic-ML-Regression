@@ -103,28 +103,34 @@ class SageMakerPredictor:
     def __init__(
         self,
         endpoint_name: str,
-        aws_access_key_id: str,
-        aws_secret_access_key: str,
+        aws_access_key_id: Optional[str] = None,
+        aws_secret_access_key: Optional[str] = None,
         region_name: str = "us-east-2"
     ):
         """
         Inicializa el predictor con las credenciales de AWS y el nombre del endpoint.
-        
+
         Args:
             endpoint_name: Nombre del endpoint desplegado en SageMaker
-            aws_access_key_id: Access Key ID de AWS
-            aws_secret_access_key: Secret Access Key de AWS
+            aws_access_key_id: Access Key ID de AWS (opcional)
+            aws_secret_access_key: Secret Access Key de AWS (opcional)
             region_name: Región de AWS donde está el endpoint (default: us-east-2)
+
+        Si no se pasan keys, boto3 usa su cadena de credenciales por defecto:
+        variables de entorno / ~/.aws en la laptop, o el rol IAM de la tarea en ECS.
         """
         self.endpoint_name = endpoint_name
         self.serializer = SimpleCSVSerializer()
-        
-        # Creamos una sesión de boto3 con las credenciales proporcionadas
-        self.boto_session = boto3.Session(
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            region_name=region_name,
-        )
+
+        # Creamos una sesión de boto3 (con keys explícitas solo si se pasaron)
+        if aws_access_key_id and aws_secret_access_key:
+            self.boto_session = boto3.Session(
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+                region_name=region_name,
+            )
+        else:
+            self.boto_session = boto3.Session(region_name=region_name)
         
         # Cliente especializado para invocar endpoints de SageMaker
         self.runtime_client = self.boto_session.client("sagemaker-runtime")

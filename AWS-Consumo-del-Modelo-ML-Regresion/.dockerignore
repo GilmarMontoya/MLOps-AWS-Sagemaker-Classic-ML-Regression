@@ -1,0 +1,7 @@
+# Nunca meter credenciales en la imagen
+.env
+.env.*
+!.env.example
+__pycache__/
+.vscode/
+*.md

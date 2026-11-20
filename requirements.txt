@@ -1,0 +1,27 @@
+# Dependencias de los notebooks (linear-learner-houses-LOCAL.ipynb y compañía)
+#
+#   conda create -y -n MLOps-AWS-Regresion-Houses python=3.11
+#   conda activate MLOps-AWS-Regresion-Houses
+#   pip install -r requirements.txt
+#
+# Las apps de AWS-Consumo-del-Modelo-ML-Regresion tienen su propio requirements.txt.
+
+# SageMaker SDK v2: la v3 es una reescritura y ya no trae sagemaker.session,
+# sagemaker.amazon.common (RecordIO) ni Estimator, que usan los notebooks
+sagemaker>=2.257,<3
+boto3>=1.44
+
+# Datos, cómputo y evaluación
+numpy>=2.4
+pandas>=3.1
+scikit-learn>=1.9
+
+# Gráficos
+matplotlib>=3.11
+seaborn>=0.13
+
+# Configuración y variables de entorno
+python-dotenv>=1.2
+
+# Kernel de Jupyter para abrir los notebooks con este entorno
+ipykernel>=7.4
