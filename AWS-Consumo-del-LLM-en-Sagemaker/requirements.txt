@@ -1,0 +1,8 @@
+# Integración con AWS / SageMaker (solo boto3: no hace falta el SDK sagemaker)
+boto3
+
+# Frontend web
+streamlit
+
+# Configuración y variables de entorno
+python-dotenv
